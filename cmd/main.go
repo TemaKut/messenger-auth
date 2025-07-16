@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/TemaKut/messenger-auth/cmd/commands/migration"
 	"github.com/TemaKut/messenger-auth/cmd/factory"
 	"github.com/urfave/cli/v2"
 	"log"
@@ -14,6 +15,9 @@ import (
 func main() {
 	app := cli.App{
 		Name: "Auth",
+		Commands: []*cli.Command{
+			migration.Command,
+		},
 		Action: func(cliCtx *cli.Context) error {
 			ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 			defer cancel()
