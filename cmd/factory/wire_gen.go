@@ -20,16 +20,22 @@ func InitApp() (App, func(), error) {
 	if err != nil {
 		return App{}, nil, err
 	}
-	storage := ProvideUserStorage()
-	service := userservice.NewService(storage)
-	handler := user.NewHandler(service)
-	grpcServerProvider, cleanup, err := ProvideGrpcServer(configConfig, handler, logger)
+	postgresDb, cleanup, err := ProvidePostgresDb(configConfig, logger)
 	if err != nil {
 		return App{}, nil, err
 	}
+	storage := ProvideUserStorage(postgresDb)
+	service := userservice.NewService(storage)
+	handler := user.NewHandler(service)
+	grpcServerProvider, cleanup2, err := ProvideGrpcServer(configConfig, handler, logger)
+	if err != nil {
+		cleanup()
+		return App{}, nil, err
+	}
 	grpcProvider := ProvideGrpcProvider(grpcServerProvider)
-	app, cleanup2 := ProvideApp(logger, grpcProvider)
+	app, cleanup3 := ProvideApp(logger, grpcProvider)
 	return app, func() {
+		cleanup3()
 		cleanup2()
 		cleanup()
 	}, nil

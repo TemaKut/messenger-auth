@@ -11,9 +11,9 @@ type Storage struct {
 	postgresDb *sql.DB
 }
 
-func NewStorage() *Storage {
+func NewStorage(postgresDb *sql.DB) *Storage {
 	return &Storage{
-		// TODO postgresDb: postgresDb,
+		postgresDb: postgresDb,
 	}
 }
 

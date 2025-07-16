@@ -20,7 +20,9 @@ func main() {
 
 			_, shutdown, err := factory.InitApp()
 			if err != nil {
-				shutdown()
+				if shutdown != nil {
+					shutdown()
+				}
 
 				return fmt.Errorf("error init app. %w", err)
 			}

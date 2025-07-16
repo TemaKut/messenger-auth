@@ -10,10 +10,8 @@ type Config struct {
 		}
 	}
 	Storage struct {
-		User struct {
-			Postgres struct {
-				ConnStr string
-			}
+		Postgres struct {
+			ConnStr string
 		}
 	}
 }
