@@ -4,14 +4,29 @@ type User struct {
 	id       string
 	name     string
 	lastName string
+	email    string
 }
 
-func NewUserFromDb(id string, name string, lastName string) *User {
+func NewUserFromDb(
+	id string,
+	name string,
+	lastName string,
+	email string,
+) *User {
 	return &User{
 		id:       id,
 		name:     name,
 		lastName: lastName,
+		email:    email,
 	}
+}
+
+func (u *User) Email() string {
+	return u.email
+}
+
+func (u *User) SetEmail(email string) {
+	u.email = email
 }
 
 func (u *User) Id() string {

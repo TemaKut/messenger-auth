@@ -24,7 +24,7 @@ func InitApp() (App, func(), error) {
 	if err != nil {
 		return App{}, nil, err
 	}
-	storage := ProvideUserStorage(postgresDb)
+	storage := ProvideUserStorage(postgresDb, logger)
 	service := userservice.NewService(storage)
 	handler := user.NewHandler(service)
 	grpcServerProvider, cleanup2, err := ProvideGrpcServer(configConfig, handler, logger)

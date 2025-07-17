@@ -47,6 +47,7 @@ func ProvidePostgresDb(cfg *config.Config, logger *logger.Logger) (PostgresDb, f
 
 func ProvideUserStorage(
 	db PostgresDb,
+	logger *logger.Logger,
 ) *userstorage.Storage {
-	return userstorage.NewStorage(db.DB)
+	return userstorage.NewStorage(db.DB, logger)
 }
