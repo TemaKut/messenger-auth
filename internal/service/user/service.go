@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	userdto "github.com/TemaKut/messenger-auth/internal/dto/user"
 	userstorage "github.com/TemaKut/messenger-auth/internal/storage/user"
@@ -27,10 +28,23 @@ func (s *Service) Register(ctx context.Context, params userdto.RegisterParams) (
 		PasswordHash: s.hashUserPassword(params.Password),
 	})
 	if err != nil {
-		return userdto.User{}, fmt.Errorf("error register user. %w", err)
+		return userdto.User{}, encodeError(fmt.Errorf("error register user. %w", err))
 	}
 
 	return encodeUser(user), nil
+}
+
+func encodeError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	switch {
+	case errors.Is(err, userstorage.ErrUserEmailAlreadyExists):
+		return fmt.Errorf("%w, %w", userdto.ErrUserEmailAlreadyExists, err)
+	default:
+		return userdto.ErrUnknown
+	}
 }
 
 func (s *Service) hashUserPassword(password string) string {

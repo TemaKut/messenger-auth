@@ -49,7 +49,6 @@ func (s *Storage) UserCreate(ctx context.Context, params UserCreateParams) (*use
 	}
 
 	query := sq.Insert(usersTableName).SetMap(setMap).PlaceholderFormat(sq.Dollar)
-	fmt.Println(query.ToSql())
 	if _, err := query.RunWith(s.postgresDb).ExecContext(ctx); err != nil {
 		return nil, fmt.Errorf("error exec query. %w", s.encodeError(err))
 	}

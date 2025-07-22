@@ -2,9 +2,13 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	userdto "github.com/TemaKut/messenger-auth/internal/dto/user"
 	authv1 "github.com/TemaKut/messenger-service-proto/gen/go/auth"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Handler struct {
@@ -30,10 +34,35 @@ func (h *Handler) UserRegister(
 		Password: req.GetPassword(),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error register user. %w", err)
+		return nil, fmt.Errorf("error register user. %w", encodeError(err))
 	}
 
 	return &authv1.UserAPIUserRegisterResponse{
 		User: encodeUser(user),
 	}, nil
 }
+
+func encodeError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	switch {
+	case errors.Is(err, userdto.ErrUserEmailAlreadyExists):
+		st, innerErr := status.Convert(err).
+			WithDetails(&errdetails.ErrorInfo{Reason: ErrorReasonUserEmailAlreadyExists})
+		if innerErr != nil {
+			return status.Errorf(codes.Unknown, "error-unknown. %s. %s", innerErr, err)
+		}
+
+		return st.Err()
+	default:
+		return status.Errorf(codes.Unknown, "error-unknown. %s", err)
+	}
+}
+
+type ErrorReason = string
+
+var (
+	ErrorReasonUserEmailAlreadyExists ErrorReason = "user-email-already-exist"
+)
