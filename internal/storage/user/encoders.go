@@ -8,5 +8,6 @@ func encodeUser(userDbo UserDbo) *usermodels.User {
 		userDbo.Data.Name,
 		userDbo.Data.LastName,
 		userDbo.Email,
+		userDbo.Data.PasswordHash,
 	)
 }

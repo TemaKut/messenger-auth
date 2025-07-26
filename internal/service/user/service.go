@@ -2,12 +2,9 @@ package userservice
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
-	"errors"
 	"fmt"
 	userdto "github.com/TemaKut/messenger-auth/internal/dto/user"
-	userstorage "github.com/TemaKut/messenger-auth/internal/storage/user"
+	usermodels "github.com/TemaKut/messenger-auth/internal/models/user"
 )
 
 type Service struct {
@@ -21,35 +18,45 @@ func NewService(storage Storage) *Service {
 }
 
 func (s *Service) Register(ctx context.Context, params userdto.RegisterParams) (userdto.User, error) {
-	user, err := s.storage.UserCreate(ctx, userstorage.UserCreateParams{
-		Name:         params.Name,
-		LastName:     params.LastName,
-		Email:        params.Email,
-		PasswordHash: s.hashUserPassword(params.Password),
-	})
-	if err != nil {
+	userModel := usermodels.NewUser(
+		params.Name,
+		params.LastName,
+		params.Email,
+		params.Password,
+	)
+
+	if err := s.storage.UserCreate(ctx, userModel); err != nil {
 		return userdto.User{}, encodeError(fmt.Errorf("error register user. %w", err))
 	}
 
-	return encodeUser(user), nil
+	return encodeUser(userModel), nil
 }
 
-func encodeError(err error) error {
-	if err == nil {
-		return nil
+func (s *Service) Authorize(
+	ctx context.Context,
+	params userdto.UserAuthorizeParams,
+) (userdto.UserAuthorizeResult, error) {
+	authenticator, err := s.chooseUserCredentialsAuthenticator(params.Credentials)
+	if err != nil {
+		return userdto.UserAuthorizeResult{}, fmt.Errorf("error choose authentificator. %w", err)
 	}
 
+	fmt.Println(authenticator.authentify(ctx))
+
+	return userdto.UserAuthorizeResult{}, nil
+}
+
+func (s *Service) chooseUserCredentialsAuthenticator(
+	credentials userdto.UserAuthorizeCredentials,
+) (userCredentialsAuthenticator, error) {
 	switch {
-	case errors.Is(err, userstorage.ErrUserEmailAlreadyExists):
-		return fmt.Errorf("%w, %w", userdto.ErrUserEmailAlreadyExists, err)
+	case credentials.Email != nil:
+		return newUserCredentialsEmailAuthenticator(
+			s.storage,
+			credentials.Email.Email,
+			credentials.Email.Password,
+		), nil
 	default:
-		return userdto.ErrUnknown
+		return nil, fmt.Errorf("error unsupported credentials")
 	}
-}
-
-func (s *Service) hashUserPassword(password string) string {
-	hash := md5.New()
-	hash.Write([]byte(password))
-
-	return hex.EncodeToString(hash.Sum(nil))
 }

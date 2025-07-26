@@ -2,13 +2,9 @@ package user
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	userdto "github.com/TemaKut/messenger-auth/internal/dto/user"
 	authv1 "github.com/TemaKut/messenger-service-proto/gen/go/auth"
-	"google.golang.org/genproto/googleapis/rpc/errdetails"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type Handler struct {
@@ -23,10 +19,10 @@ func NewHandler(service Service) *Handler {
 	}
 }
 
-func (h *Handler) UserRegister(
+func (h *Handler) Register(
 	ctx context.Context,
-	req *authv1.UserAPIUserRegisterRequest,
-) (*authv1.UserAPIUserRegisterResponse, error) {
+	req *authv1.UserAPIRegisterRequest,
+) (*authv1.UserAPIRegisterResponse, error) {
 	user, err := h.service.Register(ctx, userdto.RegisterParams{
 		Name:     req.GetName(),
 		LastName: req.GetLastName(),
@@ -37,32 +33,28 @@ func (h *Handler) UserRegister(
 		return nil, fmt.Errorf("error register user. %w", encodeError(err))
 	}
 
-	return &authv1.UserAPIUserRegisterResponse{
+	return &authv1.UserAPIRegisterResponse{
 		User: encodeUser(user),
 	}, nil
 }
 
-func encodeError(err error) error {
-	if err == nil {
-		return nil
+func (h *Handler) Authorize(
+	ctx context.Context,
+	req *authv1.UserAPIAuthorizeRequest,
+) (*authv1.UserAPIAuthorizeResponse, error) {
+	authorizeParams, err := decodeAuthorizeRequest(req)
+	if err != nil {
+		return nil, fmt.Errorf("error decode authorize request. %w", err)
 	}
 
-	switch {
-	case errors.Is(err, userdto.ErrUserEmailAlreadyExists):
-		st, innerErr := status.Convert(err).
-			WithDetails(&errdetails.ErrorInfo{Reason: ErrorReasonUserEmailAlreadyExists})
-		if innerErr != nil {
-			return status.Errorf(codes.Unknown, "error-unknown. %s. %s", innerErr, err)
-		}
-
-		return st.Err()
-	default:
-		return status.Errorf(codes.Unknown, "error-unknown. %s", err)
+	authorizeResult, err := h.service.Authorize(ctx, authorizeParams)
+	if err != nil {
+		return nil, fmt.Errorf("error authorize user. %w", encodeError(err))
 	}
+
+	return encodeAuthorizeResult(authorizeResult), nil
 }
 
-type ErrorReason = string
-
-var (
-	ErrorReasonUserEmailAlreadyExists ErrorReason = "user-email-already-exist"
-)
+func toPtr[T any](v T) *T {
+	return &v
+}

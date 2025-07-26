@@ -8,7 +8,6 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/TemaKut/messenger-auth/internal/app/logger"
 	usermodels "github.com/TemaKut/messenger-auth/internal/models/user"
-	"github.com/google/uuid"
 	pgconn "github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -31,16 +30,8 @@ type UserCreateParams struct {
 	PasswordHash string
 }
 
-func (s *Storage) UserCreate(ctx context.Context, params UserCreateParams) (*usermodels.User, error) {
-	userDbo := UserDbo{
-		Id:    uuid.New().String(),
-		Email: params.Email,
-		Data: UserDboData{
-			Name:         params.Name,
-			LastName:     params.LastName,
-			PasswordHash: params.PasswordHash,
-		},
-	}
+func (s *Storage) UserCreate(ctx context.Context, user *usermodels.User) error {
+	userDbo := decodeUser(user)
 
 	setMap := map[string]any{
 		usersIdColumn:    userDbo.Id,
@@ -50,7 +41,27 @@ func (s *Storage) UserCreate(ctx context.Context, params UserCreateParams) (*use
 
 	query := sq.Insert(usersTableName).SetMap(setMap).PlaceholderFormat(sq.Dollar)
 	if _, err := query.RunWith(s.postgresDb).ExecContext(ctx); err != nil {
-		return nil, fmt.Errorf("error exec query. %w", s.encodeError(err))
+		return fmt.Errorf("error exec query. %w", s.encodeError(err))
+	}
+
+	return nil
+}
+
+func (s *Storage) UserByEmail(ctx context.Context, email string) (*usermodels.User, error) {
+	query := sq.Select(
+		usersIdColumn,
+		usersEmailColumn,
+		usersDataColumn,
+	).
+		From(usersTableName).
+		Where(sq.Eq{usersEmailColumn: email}).
+		PlaceholderFormat(sq.Dollar)
+
+	var userDbo UserDbo
+
+	err := query.RunWith(s.postgresDb).QueryRowContext(ctx).Scan(&userDbo.Id, &userDbo.Email, &userDbo.Data)
+	if err != nil {
+		return nil, fmt.Errorf("error exec query row. %w", s.encodeError(err))
 	}
 
 	return encodeUser(userDbo), nil
