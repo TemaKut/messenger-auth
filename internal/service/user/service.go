@@ -41,9 +41,15 @@ func (s *Service) Authorize(
 		return userdto.UserAuthorizeResult{}, fmt.Errorf("error choose authentificator. %w", err)
 	}
 
-	fmt.Println(authenticator.authentify(ctx))
+	user, err := authenticator.authentify(ctx)
+	if err != nil {
+		return userdto.UserAuthorizeResult{}, fmt.Errorf("error authentify user. %w", err)
+	}
 
-	return userdto.UserAuthorizeResult{}, nil
+	return userdto.UserAuthorizeResult{
+		User: encodeUser(user),
+		//TODO
+	}, nil
 }
 
 func (s *Service) chooseUserCredentialsAuthenticator(

@@ -60,7 +60,11 @@ func (s *Storage) UserByEmail(ctx context.Context, email string) (*usermodels.Us
 	var userDbo UserDbo
 
 	err := query.RunWith(s.postgresDb).QueryRowContext(ctx).Scan(&userDbo.Id, &userDbo.Email, &userDbo.Data)
-	if err != nil {
+	switch {
+	case err == nil:
+	case errors.Is(err, sql.ErrNoRows):
+		return nil, fmt.Errorf("error query row. %w. %w", ErrUserNotFound, err)
+	default:
 		return nil, fmt.Errorf("error exec query row. %w", s.encodeError(err))
 	}
 

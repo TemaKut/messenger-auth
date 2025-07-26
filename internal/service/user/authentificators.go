@@ -3,6 +3,7 @@ package userservice
 import (
 	"context"
 	"fmt"
+	userdto "github.com/TemaKut/messenger-auth/internal/dto/user"
 	usermodels "github.com/TemaKut/messenger-auth/internal/models/user"
 )
 
@@ -27,11 +28,11 @@ func newUserCredentialsEmailAuthenticator(
 func (u *userCredentialsEmailAuthenticator) authentify(ctx context.Context) (*usermodels.User, error) {
 	user, err := u.storage.UserByEmail(ctx, u.email)
 	if err != nil {
-		return nil, fmt.Errorf("error fetch user by email %s. %w", u.email, err)
+		return nil, fmt.Errorf("error fetch user by email %s. %w. %w", u.email, userdto.ErrInvalidCredentials, err)
 	}
 
 	if !user.ComparePassword(u.password) {
-		return nil, fmt.Errorf("invalid password") // TODO specific error
+		return nil, fmt.Errorf("invalid password. %w", userdto.ErrInvalidCredentials)
 	}
 
 	return user, nil

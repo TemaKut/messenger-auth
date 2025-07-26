@@ -53,6 +53,14 @@ func encodeError(err error) error {
 		}
 
 		return st.Err()
+	case errors.Is(err, userdto.ErrInvalidCredentials):
+		st, innerErr := status.Convert(err).
+			WithDetails(&errdetails.ErrorInfo{Reason: ErrorInvalidCredentials})
+		if innerErr != nil {
+			return status.Errorf(codes.Unknown, "error-unknown. %s. %s", innerErr, err)
+		}
+
+		return st.Err()
 	default:
 		return status.Errorf(codes.Unknown, "error-unknown. %s", err)
 	}
