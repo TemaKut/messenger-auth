@@ -5,15 +5,28 @@ import (
 	"fmt"
 	userdto "github.com/TemaKut/messenger-auth/internal/dto/user"
 	usermodels "github.com/TemaKut/messenger-auth/internal/models/user"
+	"time"
 )
 
 type Service struct {
 	storage Storage
+
+	authTokenSecret              string
+	accessTokenLifetimeDuration  time.Duration
+	refreshTokenLifetimeDuration time.Duration
 }
 
-func NewService(storage Storage) *Service {
+func NewService(
+	storage Storage,
+	authTokenSecret string,
+	accessTokenLifetimeDuration time.Duration,
+	refreshTokenLifetimeDuration time.Duration,
+) *Service {
 	return &Service{
-		storage: storage,
+		storage:                      storage,
+		authTokenSecret:              authTokenSecret,
+		accessTokenLifetimeDuration:  accessTokenLifetimeDuration,
+		refreshTokenLifetimeDuration: refreshTokenLifetimeDuration,
 	}
 }
 
@@ -46,9 +59,33 @@ func (s *Service) Authorize(
 		return userdto.UserAuthorizeResult{}, fmt.Errorf("error authentify user. %w", err)
 	}
 
+	accessTokenExpiredAt := time.Now().Add(s.accessTokenLifetimeDuration)
+	refreshTokenExpiredAt := time.Now().Add(s.refreshTokenLifetimeDuration)
+
+	accessTokenStr, err := newAuthToken().
+		setSubject(user.Id()).
+		setExpiredAt(accessTokenExpiredAt).
+		setType(authTokenTypeAccess).
+		build(s.authTokenSecret)
+	if err != nil {
+		return userdto.UserAuthorizeResult{}, fmt.Errorf("error building access token. %w", err)
+	}
+
+	refreshTokenStr, err := newAuthToken().
+		setSubject(user.Id()).
+		setExpiredAt(refreshTokenExpiredAt).
+		setType(authTokenTypeRefresh).
+		build(s.authTokenSecret)
+	if err != nil {
+		return userdto.UserAuthorizeResult{}, fmt.Errorf("error building refresh token. %w", err)
+	}
+
 	return userdto.UserAuthorizeResult{
 		User: encodeUser(user),
-		//TODO
+		AuthParams: userdto.AuthParams{
+			AccessToken:  encodeAuthToken(accessTokenStr, accessTokenExpiredAt),
+			RefreshToken: encodeAuthToken(refreshTokenStr, refreshTokenExpiredAt),
+		},
 	}, nil
 }
 

@@ -9,7 +9,6 @@ package factory
 import (
 	"github.com/TemaKut/messenger-auth/internal/app/config"
 	"github.com/TemaKut/messenger-auth/internal/app/handler/grpc/user"
-	"github.com/TemaKut/messenger-auth/internal/service/user"
 )
 
 // Injectors from wire.go:
@@ -25,7 +24,11 @@ func InitApp() (App, func(), error) {
 		return App{}, nil, err
 	}
 	storage := ProvideUserStorage(postgresDb, logger)
-	service := userservice.NewService(storage)
+	service, err := ProvideUserService(configConfig, storage)
+	if err != nil {
+		cleanup()
+		return App{}, nil, err
+	}
 	handler := user.NewHandler(service)
 	grpcServerProvider, cleanup2, err := ProvideGrpcServer(configConfig, handler, logger)
 	if err != nil {

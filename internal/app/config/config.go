@@ -9,6 +9,13 @@ type Config struct {
 			Addr string
 		}
 	}
+	Services struct {
+		User struct {
+			AuthTokenSecret              string
+			AccessTokenLifetimeDuration  string
+			RefreshTokenLifetimeDuration string
+		}
+	}
 	Storage struct {
 		Postgres struct {
 			ConnStr string

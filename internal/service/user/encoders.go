@@ -6,6 +6,7 @@ import (
 	userdto "github.com/TemaKut/messenger-auth/internal/dto/user"
 	usermodels "github.com/TemaKut/messenger-auth/internal/models/user"
 	userstorage "github.com/TemaKut/messenger-auth/internal/storage/user"
+	"time"
 )
 
 func encodeUser(user *usermodels.User) userdto.User {
@@ -13,6 +14,13 @@ func encodeUser(user *usermodels.User) userdto.User {
 		Id:       user.Id(),
 		Name:     user.Name(),
 		LastName: user.LastName(),
+	}
+}
+
+func encodeAuthToken(token string, exp time.Time) userdto.AuthToken {
+	return userdto.AuthToken{
+		Token:     token,
+		ExpiredAt: exp,
 	}
 }
 
