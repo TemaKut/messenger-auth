@@ -4,6 +4,7 @@ import (
 	"errors"
 	userdto "github.com/TemaKut/messenger-auth/internal/dto/user"
 	authv1 "github.com/TemaKut/messenger-service-proto/gen/go/auth"
+	"github.com/go-playground/validator/v10"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -44,18 +45,27 @@ func encodeError(err error) error {
 		return nil
 	}
 
+	var validationErrors validator.ValidationErrors
+
+	if errors.As(err, &validationErrors) {
+		st, innerErr := status.Convert(err).WithDetails(&errdetails.ErrorInfo{Reason: ErrorReasonValidation})
+		if innerErr != nil {
+			return status.Errorf(codes.Unknown, "error-unknown. %s. %s", innerErr, err)
+		}
+
+		return st.Err()
+	}
+
 	switch {
 	case errors.Is(err, userdto.ErrUserEmailAlreadyExists):
-		st, innerErr := status.Convert(err).
-			WithDetails(&errdetails.ErrorInfo{Reason: ErrorReasonUserEmailAlreadyExists})
+		st, innerErr := status.Convert(err).WithDetails(&errdetails.ErrorInfo{Reason: ErrorReasonUserEmailAlreadyExists})
 		if innerErr != nil {
 			return status.Errorf(codes.Unknown, "error-unknown. %s. %s", innerErr, err)
 		}
 
 		return st.Err()
 	case errors.Is(err, userdto.ErrInvalidCredentials):
-		st, innerErr := status.Convert(err).
-			WithDetails(&errdetails.ErrorInfo{Reason: ErrorInvalidCredentials})
+		st, innerErr := status.Convert(err).WithDetails(&errdetails.ErrorInfo{Reason: ErrorInvalidCredentials})
 		if innerErr != nil {
 			return status.Errorf(codes.Unknown, "error-unknown. %s. %s", innerErr, err)
 		}

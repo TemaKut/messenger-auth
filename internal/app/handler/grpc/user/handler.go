@@ -5,6 +5,7 @@ import (
 	"fmt"
 	userdto "github.com/TemaKut/messenger-auth/internal/dto/user"
 	authv1 "github.com/TemaKut/messenger-service-proto/gen/go/auth"
+	"github.com/go-playground/validator/v10"
 )
 
 type Handler struct {
@@ -23,12 +24,18 @@ func (h *Handler) Register(
 	ctx context.Context,
 	req *authv1.UserAPIRegisterRequest,
 ) (*authv1.UserAPIRegisterResponse, error) {
-	user, err := h.service.Register(ctx, userdto.RegisterParams{
+	registerParams := userdto.RegisterParams{
 		Name:     req.GetName(),
 		LastName: req.GetLastName(),
 		Email:    req.GetEmail(),
 		Password: req.GetPassword(),
-	})
+	}
+
+	if err := validator.New().Struct(registerParams); err != nil {
+		return nil, fmt.Errorf("error validate register params. %w", encodeError(err))
+	}
+
+	user, err := h.service.Register(ctx, registerParams)
 	if err != nil {
 		return nil, fmt.Errorf("error register user. %w", encodeError(err))
 	}

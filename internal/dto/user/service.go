@@ -3,10 +3,10 @@ package userdto
 import "time"
 
 type RegisterParams struct {
-	Name     string
+	Name     string `validate:"required"`
 	LastName string
-	Email    string
-	Password string
+	Email    string `validate:"required,email"`
+	Password string `validate:"required,min=8,max=40"`
 }
 
 type UserAuthorizeParams struct {
