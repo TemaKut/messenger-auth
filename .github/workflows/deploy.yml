@@ -1,0 +1,26 @@
+name: Deploy
+
+on:
+  push: # TODO optional run
+    branches:
+      - main
+
+jobs:
+  # TODO tests with cfg
+  build-and-push-registry:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+        - name: Log in to Docker Hub
+          uses: docker/login-action@v3
+          with:
+            username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+            password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+        - name: Build and push Docker image
+          uses: docker/build-push-action@v5
+          with:
+            context: .
+            push: true
+            tags: temacu/messenger-auth:${{ github.sha }}
+
