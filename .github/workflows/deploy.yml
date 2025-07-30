@@ -1,10 +1,9 @@
 name: Deploy
 
 on:
-  push: # TODO
+  push: # TODO on tag
 
 jobs:
-  # TODO tests with cfg
   build-and-push-registry:
     runs-on: self-hosted
     steps:
