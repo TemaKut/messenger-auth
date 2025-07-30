@@ -1,19 +1,12 @@
 name: Deploy
 
 on:
-  workflow_dispatch:
-    inputs:
-      run_optional_job:
-        description: 'Run optional job?'
-        required: false
-        default: 'false'
-        type: choice
-        options: ['true', 'false']
+  push: # TODO
+
 jobs:
   # TODO tests with cfg
   build-and-push-registry:
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.run_optional_job == 'true' }}
     steps:
         - name: Checkout code
           uses: actions/checkout@v4
@@ -25,7 +18,7 @@ jobs:
         - name: Build and push Docker image
           uses: docker/build-push-action@v5
           with:
-            context: .
+            context: ./infra
             push: true
-            tags: temacu/messenger-auth:${{ github.sha }}
+            tags: ${{ secrets.DOCKER_REGISTRY_USERNAME }}/messenger-auth:${{ github.sha }}
 
