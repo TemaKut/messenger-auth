@@ -1,7 +1,7 @@
 name: Deploy
 
 on:
-  push: # TODO on tag
+  push: # TODO on tag 
 
 jobs:
   build-and-push-registry:
