@@ -1,7 +1,7 @@
 name: Deploy
 
 on:
-  push: # TODO on tag 
+  push: # TODO on tag
 
 jobs:
   build-and-push-registry:
@@ -21,4 +21,5 @@ jobs:
             file: ./infra/Dockerfile
             push: true
             tags: ${{ secrets.DOCKER_REGISTRY_USERNAME }}/messenger-auth:${{ github.sha }}
+
 
