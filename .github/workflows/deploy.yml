@@ -23,7 +23,13 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_REGISTRY_USERNAME }}/messenger-auth:${{ github.sha }}
 
-
-
-
-
+  apply-k8s-manifests:
+    runs-on: self-hosted
+    environment: apply-k8s-manifests
+    steps:
+      - name: Checkout code with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: `true`
+      - name: apply-postgres-db
+        run: kubectl apply -f infra/k8s/stage/pods/auth-postgres/auth-postgres.yaml
