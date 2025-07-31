@@ -6,7 +6,7 @@ on:
 jobs:
   build-and-push-registry:
     runs-on: self-hosted
-    environment: test
+    environment: build-and-push-registry
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
