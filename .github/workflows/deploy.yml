@@ -30,6 +30,6 @@ jobs:
       - name: Checkout code with submodules
         uses: actions/checkout@v4
         with:
-          submodules: `true`
+          submodules: recursive
       - name: apply-postgres-db
         run: kubectl apply -f infra/k8s/stage/pods/auth-postgres/auth-postgres.yaml
