@@ -27,6 +27,7 @@ jobs:
 #    needs: build-and-push-registry
     runs-on: self-hosted
 #    environment: apply-k8s-manifests
+
     steps:
       - name: Checkout code with submodules
         uses: actions/checkout@v4
