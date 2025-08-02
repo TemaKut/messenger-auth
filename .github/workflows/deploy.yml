@@ -1,12 +1,12 @@
 name: Deploy
 
 on:
-  push: # TODO on tag
+  push:
 
 jobs:
   build-and-push-registry:
     runs-on: self-hosted
-    environment: test
+    environment: build-and-push-registry
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,5 +23,16 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_REGISTRY_USERNAME }}/messenger-auth:${{ github.sha }}
 
-
-
+  apply-k8s-manifests:
+    needs: build-and-push-registry
+    runs-on: self-hosted
+    environment: apply-k8s-manifests
+    steps:
+      - name: Checkout code with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: apply-config
+        run: kubectl apply -f infra/k8s/stage/services/auth/config.yaml
+      - name: apply-postgres-db
+        run: kubectl apply -f infra/k8s/stage/services/auth/postgres.yaml
