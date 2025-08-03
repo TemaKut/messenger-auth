@@ -4,35 +4,35 @@ on:
   push:
 
 jobs:
-  build-and-push-registry:
-    runs-on: self-hosted
-    environment: build-and-push-registry
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
-          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./infra/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_REGISTRY_USERNAME }}/messenger-auth:${{ github.sha }}
+#  build-and-push-registry:
+#    runs-on: self-hosted
+#    environment: build-and-push-registry
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#      - name: Log in to Docker Hub
+#        uses: docker/login-action@v3
+#        with:
+#          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+#          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+#      - name: Build and push Docker image
+#        uses: docker/build-push-action@v5
+#        with:
+#          context: .
+#          file: ./infra/Dockerfile
+#          push: true
+#          tags: ${{ secrets.DOCKER_REGISTRY_USERNAME }}/messenger-auth:${{ github.sha }}
 
   apply-k8s-manifests:
-    needs: build-and-push-registry
+#    needs: build-and-push-registry
     runs-on: self-hosted
-    environment: apply-k8s-manifests
+#    environment: apply-k8s-manifests
     steps:
       - name: Checkout code with submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: apply-auth-manifests
-        uses: action.yml
+        uses: infra/k8s/stage/services/auth/.github/workflows/action.yml
         with:
           runs-on: self-hosted
