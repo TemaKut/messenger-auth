@@ -33,6 +33,4 @@ jobs:
         with:
           submodules: recursive
       - name: apply-auth-manifests
-        uses: infra/k8s/stage/services/auth/.github/workflows/action.yml
-        with:
-          runs-on: self-hosted
+        uses: TemaKut/messenger-k8s/.github/workflows/services/auth/action.yml@new/auth
