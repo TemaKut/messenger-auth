@@ -31,3 +31,4 @@ jobs:
       apply-config: true
       apply-db: true
       apply-service-tag: ${{ github.sha }}
+
