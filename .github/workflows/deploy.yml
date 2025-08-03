@@ -28,4 +28,6 @@ jobs:
     uses: TemaKut/messenger-k8s/.github/workflows/service-auth-deploy-action.yml@new/auth
     with:
       path-to-root: infra/k8s/
+      apply-config: true
+      apply-db: true
       apply-service-tag: ${{ github.sha }}
