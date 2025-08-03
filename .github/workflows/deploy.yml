@@ -33,6 +33,6 @@ jobs:
         with:
           submodules: recursive
       - name: apply-auth-manifests
-        uses: ./infra/k8s/stage/services/auth/.github/workflows/deploy.yml
+        uses: action.yml
         with:
           runs-on: self-hosted
