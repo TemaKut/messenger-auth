@@ -25,12 +25,5 @@ jobs:
 
   apply-k8s-manifests:
 #    needs: build-and-push-registry
-    runs-on: self-hosted
 #    environment: apply-k8s-manifests
-    steps:
-      - name: Checkout code with submodules
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: apply-auth-manifests
-        uses: TemaKut/messenger-k8s/.github/workflows/services/auth/action.yml@new/auth
+    uses: TemaKut/messenger-k8s/.github/workflows/services/auth/action.yml@new/auth
