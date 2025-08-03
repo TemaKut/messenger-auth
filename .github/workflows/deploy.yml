@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: apply-config
-        run: kubectl apply -f infra/k8s/stage/services/auth/config.yaml
-      - name: apply-postgres-db
-        run: kubectl apply -f infra/k8s/stage/services/auth/postgres.yaml
+      - name: apply-auth-manifests
+        uses: ./infra/k8s/stage/services/auth/.github/workflows/deploy.yml
+        with:
+          runs-on: self-hosted
