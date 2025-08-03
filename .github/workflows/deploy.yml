@@ -25,14 +25,9 @@ jobs:
 
   apply-k8s-manifests:
     needs: build-and-push-registry
-    runs-on: self-hosted
-    environment: apply-k8s-manifests
-    steps:
-      - name: Checkout code with submodules
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: apply-config
-        run: kubectl apply -f infra/k8s/stage/services/auth/config.yaml
-      - name: apply-postgres-db
-        run: kubectl apply -f infra/k8s/stage/services/auth/postgres.yaml
+    uses: TemaKut/messenger-k8s/.github/workflows/service-auth-deploy-action.yml@main
+    with:
+      path-to-root: infra/k8s/
+      apply-config: true
+      apply-db: true
+      apply-service-tag: ${{ github.sha }}
