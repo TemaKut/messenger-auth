@@ -27,3 +27,5 @@ jobs:
 #    needs: build-and-push-registry
 #    environment: apply-k8s-manifests
     uses: TemaKut/messenger-k8s/.github/workflows/service-auth-deploy-action.yml@new/auth
+    with:
+      path-to-root: infra/k8s/
