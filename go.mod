@@ -18,6 +18,7 @@ require (
 )
 
 require (
+	github.com/caarlos0/env/v11 v11.3.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect

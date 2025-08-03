@@ -15,7 +15,10 @@ import (
 // Injectors from wire.go:
 
 func InitCommand() (*migration.Command, func(), error) {
-	configConfig := config.NewConfig()
+	configConfig, err := config.NewConfig()
+	if err != nil {
+		return nil, nil, err
+	}
 	logger, err := factory.ProvideLogger(configConfig)
 	if err != nil {
 		return nil, nil, err
